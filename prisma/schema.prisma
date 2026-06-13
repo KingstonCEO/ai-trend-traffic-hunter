@@ -1,0 +1,101 @@
+// Prisma schema for AI Trend Traffic Hunter
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id              String   @id @default(cuid())
+  businessName    String
+  niche           String
+  targetAudience  String
+  offerName       String
+  offerUrl        String?
+  keywords        String   // JSON array of keywords to track
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  trends          Trend[]
+  content         Content[]
+  posts           Post[]
+}
+
+model Trend {
+  id            String       @id @default(cuid())
+  source        String       // twitter, tiktok, reddit, google_trends
+  topic         String
+  description   String?
+  viralityScore Int          // 0-100
+  relevanceScore Int         // 0-100 (how well it matches user's niche)
+  totalScore    Int          // Combined score
+  url           String?
+  metadata      String?      // JSON string for additional data
+  fetchedAt     DateTime     @default(now())
+  profileId     String
+  profile       UserProfile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  content       Content[]
+  
+  @@index([profileId, totalScore])
+  @@index([fetchedAt])
+}
+
+model Content {
+  id          String       @id @default(cuid())
+  trendId     String
+  trend       Trend        @relation(fields: [trendId], references: [id], onDelete: Cascade)
+  profileId   String
+  profile     UserProfile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  contentType String       // script, meme, caption, hook, cta
+  platform    String       // youtube_shorts, tiktok, instagram_reels, twitter, etc.
+  
+  title       String?
+  body        String       // The generated content
+  hook        String?
+  cta         String?
+  hashtags    String   // JSON array
+  
+  generatedAt DateTime     @default(now())
+  posts       Post[]
+  
+  @@index([profileId, generatedAt])
+  @@index([trendId])
+}
+
+model Post {
+  id          String       @id @default(cuid())
+  contentId   String
+  content     Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  profileId   String
+  profile     UserProfile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  platform    String       // instagram, tiktok, youtube, twitter, linkedin, bluesky
+  status      String       // draft, scheduled, posted, failed
+  
+  scheduledFor DateTime?
+  postedAt    DateTime?
+  
+  postUrl     String?
+  postId      String?      // ID from the platform
+  
+  analytics   String?      // JSON string for performance data
+  error       String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@index([profileId, status])
+  @@index([scheduledFor])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  service   String   @unique // anthropic, poststream, twitter, etc.
+  key       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
