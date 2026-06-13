@@ -64,6 +64,17 @@ export default function LandingPage() {
         ref={canvasRef}
         className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20"
       />
+      
+      {/* Top Navigation */}
+      <div className="fixed top-0 right-0 z-50 p-6">
+        <Link
+          href="/settings"
+          className="bg-green-500 hover:bg-green-600 text-black font-bold px-6 py-2 rounded-lg transition-all"
+        >
+          ⚙️ API Keys
+        </Link>
+      </div>
+      
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-4 py-16 relative z-10">
         <div className="text-center space-y-6">
@@ -79,12 +90,20 @@ export default function LandingPage() {
             Set up your business once. The machine hunts for trending topics, scores the best opportunities, and turns them into scripts, captions, CTAs, and traffic campaigns.
           </p>
           
-          <Link 
-            href="/dashboard"
-            className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-2xl px-16 py-6 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_rgba(34,197,94,0.8)] animate-bounce"
-          >
-            🚀 LAUNCH THE TREND HUNTER 🚀
-          </Link>
+          <div className="space-y-4">
+            <Link 
+              href="/setup"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-2xl px-16 py-6 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_rgba(34,197,94,0.8)] animate-bounce mr-4"
+            >
+              📝 CREATE PROFILE
+            </Link>
+            <Link 
+              href="/dashboard"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-2xl px-16 py-6 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_rgba(34,197,94,0.8)] animate-bounce"
+            >
+              🚀 LAUNCH THE TREND HUNTER 🚀
+            </Link>
+          </div>
         </div>
 
         {/* Problem Section */}
@@ -146,13 +165,29 @@ export default function LandingPage() {
         </div>
 
         {/* Final CTA */}
-        <div className="mt-20 text-center">
-          <Link 
-            href="/dashboard"
-            className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-3xl px-20 py-8 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_50px_rgba(34,197,94,0.7)] hover:shadow-[0_0_80px_rgba(34,197,94,1)] animate-pulse"
-          >
-            🎯 FIND MY TRAFFIC ANGLES NOW 🎯
-          </Link>
+        <div className="mt-20 text-center space-y-4">
+          <div>
+            <Link 
+              href="/setup"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-2xl px-16 py-6 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_40px_rgba(34,197,94,0.6)] hover:shadow-[0_0_60px_rgba(34,197,94,0.8)] mr-4"
+            >
+              📝 Setup Your Profile
+            </Link>
+            <Link 
+              href="/settings"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl px-16 py-6 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_40px_rgba(59,130,246,0.6)]"
+            >
+              🔑 Add API Keys
+            </Link>
+          </div>
+          <div>
+            <Link 
+              href="/dashboard"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-3xl px-20 py-8 rounded-lg transition-all transform hover:scale-110 shadow-[0_0_50px_rgba(34,197,94,0.7)] hover:shadow-[0_0_80px_rgba(34,197,94,1)] animate-pulse"
+            >
+              🎯 FIND MY TRAFFIC ANGLES NOW 🎯
+            </Link>
+          </div>
         </div>
 
         {/* Tagline */}

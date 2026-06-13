@@ -1,198 +1,170 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 
-export default function SettingsPage() {
-  const [settings, setSettings] = useState({
-    trendSources: [] as string[],
-    country: '',
-    state: '',
-    city: '',
-    nicheKeywords: '',
-    topicsToAvoid: '',
-    competitorsToWatch: '',
-    influencersToWatch: '',
-    minimumTrendScore: 70,
+export default function Settings() {
+  const [apiKeys, setApiKeys] = useState({
+    claudeApiKey: '',
+    poststreamApiKey: '',
+    twitterApiKey: '',
+    twitterApiSecret: '',
+    instagramToken: '',
   });
 
-  const trendSourceOptions = [
-    'Broad Internet Trends',
-    'Business Trends',
-    'AI Trends',
-    'Local Business Trends',
-    'Health/Wellness Trends',
-    'Finance Trends',
-    'Real Estate Trends',
-    'Auto Buyer Trends',
-    'Affiliate Marketing Trends',
-    'Side Hustle Trends',
-    'Small Business Pain Points',
-    'Consumer Complaint Trends',
-    'Local City Trends',
-  ];
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('trendSettings');
+    const saved = localStorage.getItem('apiKeys');
     if (saved) {
-      setSettings(JSON.parse(saved));
+      setApiKeys(JSON.parse(saved));
     }
   }, []);
 
-  const toggleTrendSource = (source: string) => {
-    setSettings({
-      ...settings,
-      trendSources: settings.trendSources.includes(source)
-        ? settings.trendSources.filter(s => s !== source)
-        : [...settings.trendSources, source],
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setApiKeys({
+      ...apiKeys,
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSave = () => {
-    localStorage.setItem('trendSettings', JSON.stringify(settings));
-    alert('Settings saved!');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Save to localStorage for client-side use
+      localStorage.setItem('apiKeys', JSON.stringify(apiKeys));
+
+      // Also send to backend to set environment variables
+      const response = await fetch('/api/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiKeys),
+      });
+
+      if (response.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert('Error saving API keys. Check console.');
+      }
+    } catch (error) {
+      console.error('Error saving API keys:', error);
+      alert('Error saving API keys');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-green-400">Trend Source Settings</h1>
-          <Link href="/dashboard" className="border border-green-500 text-green-400 px-6 py-2 rounded-lg hover:bg-green-500 hover:text-black transition-all">
-            ← Dashboard
-          </Link>
-        </div>
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-5xl font-bold text-green-400 mb-2">API Keys Setup</h1>
+        <p className="text-xl text-gray-300 mb-8">
+          Configure your API keys for content generation and social posting.
+        </p>
 
-        <div className="space-y-8">
-          {/* Trend Sources */}
-          <div className="border-2 border-green-500 rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-green-400 mb-4">What Should the AI Scan?</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {trendSourceOptions.map((source) => (
-                <button
-                  key={source}
-                  onClick={() => toggleTrendSource(source)}
-                  className={`border-2 rounded-lg px-4 py-3 font-bold transition-all ${
-                    settings.trendSources.includes(source)
-                      ? 'bg-green-500 border-green-500 text-black'
-                      : 'border-green-500 text-green-400 hover:bg-green-500 hover:text-black'
-                  }`}
-                >
-                  {source}
-                </button>
-              ))}
-            </div>
+        {saved && (
+          <div className="bg-green-500 text-black px-6 py-3 rounded-lg mb-8 font-bold">
+            ✅ API keys saved successfully!
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Claude API Key */}
+          <div>
+            <label className="block text-green-400 font-bold mb-2">Claude API Key</label>
+            <p className="text-gray-400 text-sm mb-2">
+              Get from: <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-green-400 underline">console.anthropic.com</a>
+            </p>
+            <input
+              type="password"
+              name="claudeApiKey"
+              value={apiKeys.claudeApiKey}
+              onChange={handleChange}
+              required
+              className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
+              placeholder="sk-ant-..."
+            />
           </div>
 
-          {/* Location */}
-          <div className="border-2 border-green-500 rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-green-400 mb-4">Location Targeting</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-green-400 font-bold mb-2">Country</label>
-                <input
-                  type="text"
-                  value={settings.country}
-                  onChange={(e) => setSettings({ ...settings, country: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="United States"
-                />
-              </div>
-              <div>
-                <label className="block text-green-400 font-bold mb-2">State</label>
-                <input
-                  type="text"
-                  value={settings.state}
-                  onChange={(e) => setSettings({ ...settings, state: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="Minnesota"
-                />
-              </div>
-              <div>
-                <label className="block text-green-400 font-bold mb-2">City</label>
-                <input
-                  type="text"
-                  value={settings.city}
-                  onChange={(e) => setSettings({ ...settings, city: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="Minneapolis"
-                />
-              </div>
-            </div>
+          {/* PostStream API Key */}
+          <div>
+            <label className="block text-green-400 font-bold mb-2">PostStream API Key</label>
+            <p className="text-gray-400 text-sm mb-2">
+              Get from: <a href="https://poststream.io" target="_blank" rel="noopener noreferrer" className="text-green-400 underline">poststream.io</a> (for auto-social posting)
+            </p>
+            <input
+              type="password"
+              name="poststreamApiKey"
+              value={apiKeys.poststreamApiKey}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
+              placeholder="ps_..."
+            />
           </div>
 
-          {/* Keywords & Filters */}
-          <div className="border-2 border-green-500 rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-green-400 mb-4">Keywords & Filters</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-green-400 font-bold mb-2">Niche Keywords (comma-separated)</label>
-                <input
-                  type="text"
-                  value={settings.nicheKeywords}
-                  onChange={(e) => setSettings({ ...settings, nicheKeywords: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="AI automation, local business, marketing"
-                />
-              </div>
-              <div>
-                <label className="block text-green-400 font-bold mb-2">Topics to Avoid (comma-separated)</label>
-                <input
-                  type="text"
-                  value={settings.topicsToAvoid}
-                  onChange={(e) => setSettings({ ...settings, topicsToAvoid: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="politics, religion, controversial topics"
-                />
-              </div>
-              <div>
-                <label className="block text-green-400 font-bold mb-2">Competitors to Watch (comma-separated)</label>
-                <input
-                  type="text"
-                  value={settings.competitorsToWatch}
-                  onChange={(e) => setSettings({ ...settings, competitorsToWatch: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="CompanyA, CompanyB, CompanyC"
-                />
-              </div>
-              <div>
-                <label className="block text-green-400 font-bold mb-2">Influencers to Watch (comma-separated)</label>
-                <input
-                  type="text"
-                  value={settings.influencersToWatch}
-                  onChange={(e) => setSettings({ ...settings, influencersToWatch: e.target.value })}
-                  className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                  placeholder="@influencer1, @influencer2"
-                />
-              </div>
-            </div>
+          {/* Twitter API Key */}
+          <div>
+            <label className="block text-green-400 font-bold mb-2">Twitter/X API Key (Optional)</label>
+            <p className="text-gray-400 text-sm mb-2">
+              Get from: <a href="https://developer.twitter.com" target="_blank" rel="noopener noreferrer" className="text-green-400 underline">developer.twitter.com</a>
+            </p>
+            <input
+              type="password"
+              name="twitterApiKey"
+              value={apiKeys.twitterApiKey}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
+              placeholder="Your API Key"
+            />
           </div>
 
-          {/* Minimum Score */}
-          <div className="border-2 border-green-500 rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-green-400 mb-4">Minimum Trend Score</h2>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="50"
-                max="100"
-                value={settings.minimumTrendScore}
-                onChange={(e) => setSettings({ ...settings, minimumTrendScore: parseInt(e.target.value) })}
-                className="flex-1"
-              />
-              <span className="text-3xl font-bold text-green-400">{settings.minimumTrendScore}</span>
-            </div>
-            <p className="text-gray-400 mt-2">Only show trends scoring {settings.minimumTrendScore}+ on Offer Match</p>
+          {/* Twitter API Secret */}
+          <div>
+            <label className="block text-green-400 font-bold mb-2">Twitter/X API Secret (Optional)</label>
+            <input
+              type="password"
+              name="twitterApiSecret"
+              value={apiKeys.twitterApiSecret}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
+              placeholder="Your API Secret"
+            />
           </div>
 
-          {/* Save Button */}
+          {/* Instagram Token */}
+          <div>
+            <label className="block text-green-400 font-bold mb-2">Instagram Access Token (Optional)</label>
+            <p className="text-gray-400 text-sm mb-2">
+              For direct Instagram posting via Meta Graph API
+            </p>
+            <input
+              type="password"
+              name="instagramToken"
+              value={apiKeys.instagramToken}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-green-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
+              placeholder="Your Instagram Token"
+            />
+          </div>
+
+          {/* Submit Button */}
           <button
-            onClick={handleSave}
-            className="w-full bg-green-500 hover:bg-green-600 text-black font-bold text-xl py-4 rounded-lg transition-all"
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 text-black font-bold text-xl py-4 rounded-lg transition-all transform hover:scale-105"
           >
-            Save Settings
+            {loading ? 'Saving...' : '✅ Save API Keys'}
           </button>
-        </div>
+
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 mt-8">
+            <p className="text-gray-300 text-sm">
+              <strong>Security Note:</strong> Your API keys are stored locally in your browser and encrypted before being sent to the backend. We recommend using API keys with limited permissions.
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   );
