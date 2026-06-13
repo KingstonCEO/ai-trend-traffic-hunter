@@ -98,6 +98,13 @@ export default function LandingPage() {
             It Finds The Trends. It Builds The Traffic Angles. You Pick What To Post.
           </p>
         </div>
+
+        {/* Footer */}
+        <div className="mt-16 pt-8 border-t border-gray-800 text-center">
+          <p className="text-gray-500 text-sm">
+            © 2026 The Kingston Agency - All Rights Reserved Worldwide
+          </p>
+        </div>
       </div>
     </div>
   );
